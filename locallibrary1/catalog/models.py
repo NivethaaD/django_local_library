@@ -1,4 +1,9 @@
 from django.db import models
+from django.conf import settings
+from django.contrib.auth.models import User
+from datetime import date
+
+
 
 # Create your models here.
 
@@ -10,7 +15,7 @@ from django.db.models.functions import Lower # Returns lower cased value of fiel
 class Genre(models.Model):
     """Model representing a book genre."""
     name = models.CharField(
-        max_length=200,
+        max_length=210,
         unique=True,
         help_text="Enter a book genre (e.g. Science Fiction, French Poetry etc.)"
     )
@@ -93,6 +98,14 @@ class BookInstance(models.Model):
         default='m',
         help_text='Book availability',
     )
+
+    borrower = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+
+    @property
+    def is_overdue(self):
+        """Determines if the book is overdue based on due date and current date."""
+        return bool(self.due_back and date.today() > self.due_back)
+
 
     class Meta:
         ordering = ['due_back']
